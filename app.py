@@ -1,9 +1,9 @@
+import os
 import streamlit as st
 import pandas as pd
+from pandasai import SmartDataframe
+from pandasai.llm import OpenAI
 from dotenv import load_dotenv
-import os
-from pandasai import PandasAI
-from pandasai.llm.openai import OpenAI
 
 # Load environment variables (if any)
 load_dotenv()
@@ -11,38 +11,32 @@ load_dotenv()
 # Get OpenAI API key from Streamlit secrets
 openai_api_key = st.secrets["OPENAI_API_KEY"]
 
-# Create an LLM instance
-llm = OpenAI(api_token=openai_api_key)
-
-# Create PandasAI instance
-pandas_ai = PandasAI(llm)
-
 # Streamlit app title
-st.title("Prompt-driven data analysis with PandasAI")
+st.title("Chat with Dataset 💳")
 
-# File uploader
-uploaded_file = st.file_uploader("Upload a CSV file for analysis", type=["csv"])
+# Upload CSV file
+uploaded_file = st.file_uploader("Upload your CSV file", type="csv")
 
 if uploaded_file is not None:
-    # Read the uploaded CSV file
+    # Load the dataset directly from the uploaded file
     df = pd.read_csv(uploaded_file)
+    
+    # Show dataframe preview
+    with st.expander("🔍 Dataframe Preview"):
+        st.write(df.tail(3))
 
-    # Display the first few rows of the DataFrame
-    st.write("Data Preview:")
-    st.write(df.head())
+    # Input query
+    query = st.text_area("💬 Chat with Dataframe")
 
-    # Prompt input area
-    prompt = st.text_area("Enter your prompt:")
-
-    # Generate button
-    if st.button("Generate"):
-        if prompt:
-            # Generate response using PandasAI
-            with st.spinner("Generating response..."):
-                try:
-                    response = pandas_ai.run(df, prompt)
-                    st.write(response)
-                except Exception as e:
-                    st.error(f"An error occurred: {e}")
-        else:
-            st.warning("Please enter a prompt.")
+    if query:
+        # Initialize the LLM with your OpenAI API key
+        llm = OpenAI(api_key=openai_api_key)
+        query_engine = SmartDataframe(df, config={"llm": llm})
+        
+        # Get the answer from the query engine
+        answer = query_engine.chat(query)
+        
+        # Display the answer
+        st.write(answer)
+else:
+    st.write("Please upload a CSV file to start.")
