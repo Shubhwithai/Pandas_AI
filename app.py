@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 from dotenv import load_dotenv
 import os
-from pandasai import PandasAI
+import pandasai
 from pandasai.llm.openai import OpenAI
 
 # Load environment variables (if any)
