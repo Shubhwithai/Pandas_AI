@@ -28,15 +28,19 @@ if uploaded_file is not None:
     # Input query
     query = st.text_area("💬 Chat with Dataframe")
 
-    if query:
-        # Initialize the LLM with your OpenAI API key
-        llm = OpenAI(api_key=openai_api_key)
-        query_engine = SmartDataframe(df, config={"llm": llm})
-        
-        # Get the answer from the query engine
-        answer = query_engine.chat(query)
-        
-        # Display the answer
-        st.write(answer)
+    # Submit button
+    if st.button("Submit"):
+        if query:
+            # Initialize the LLM with your OpenAI API key
+            llm = OpenAI(api_key=openai_api_key)
+            query_engine = SmartDataframe(df, config={"llm": llm})
+            
+            # Get the answer from the query engine
+            answer = query_engine.chat(query)
+            
+            # Display the answer
+            st.write(answer)
+        else:
+            st.warning("Please enter a query.")
 else:
     st.write("Please upload a CSV file to start.")
